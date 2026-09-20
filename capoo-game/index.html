@@ -211,6 +211,28 @@ input[type=text]:focus{
     text-align:center;
 }
 
+/* 右上角懸浮返回首頁按鈕 (手機電腦共用) */
+.floating-home-btn {
+    position: fixed;
+    top: 20px;
+    right: 25px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    z-index: 9999;
+    transition: 0.3s;
+}
+.floating-home-btn:hover {
+    background: rgba(0, 162, 232, 0.4);
+    border-color: #4fd1ff;
+}
+
 /* 手機版 */
 @media(max-width:700px){
 
@@ -220,6 +242,7 @@ input[type=text]:focus{
 
     .login-box{
         width:95%;
+        padding: 20px;
     }
 }
 
@@ -228,7 +251,8 @@ input[type=text]:focus{
 
 <body>
 
-
+<!-- 右上角固定返回首頁按鈕，手機電腦隨時點得到 -->
+<a href="home.html" class="floating-home-btn">回首頁</a>
 
 <div class="login-box">
 
@@ -355,16 +379,14 @@ input[type=text]:focus{
         <button class="start-btn">
             🎮 開始遊戲
         </button>
-		
+        
 
     </form>
 
     <div class="footer">
         Capoo Memory Battle
     </div>
-<div style="text-align: center; padding: 10px;">
-    <a href="home.html" style="color: #4fd1ff; text-decoration: none; font-size: 16px; font-weight: bold;">回首頁</a>
-</div>
+
 </div>
 
 <script>
