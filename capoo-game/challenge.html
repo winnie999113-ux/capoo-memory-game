@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>60秒極限挑戰賽</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #121214;
+            --card-back: #00A2E8;			
+            --text-color: #e1e1e6;
+            --accent-color: #ff3b30; 
+        }
+        body {
+            background-color: var(--bg-color); 
+			color: var(--text-color);
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+			margin: 0; padding: 20px; padding-top: 1px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        nav { 
+			position: fixed; top: 0; left: 0;
+			width: 100%; background: #1a1a1e; 
+			padding: 15px 0; text-align: center; 
+			border-bottom: 2px solid var(--accent-color); z-index: 999; 
+		}
+		
+        nav a { color: var(--text-color); text-decoration: none; 
+			margin: 0 10px; font-weight: bold; }
+		
+		nav a.active { color: var(--accent-color); }
+
+        .challenge-container {
+			width: 100%;
+			max-width: 680px;   
+			display: flex;
+			flex-direction: column;
+			align-items: center; 
+			text-align: center;
+		}
+
+        #game-board { 
+			display: grid; 
+			grid-template-columns: repeat(4, 1fr);
+			gap: 15px;          
+			margin: 1px auto;
+			perspective: 1000px;
+			width: 100%;        
+			max-width: 520px;  
+		}
+		
+		h1, h2 { 
+			color: var(--accent-color); 
+			text-shadow: 0 0 10px rgba(77,166,255,0.3); 
+		}
+		
+        .card-container { 
+			width: 100%;
+			aspect-ratio: 1;    
+			position: relative; 
+			transform-style: preserve-3d; 
+			transition: transform 0.6s; 
+			cursor: pointer; 
+		}
+		
+        .card-container.flipped { 
+			transform: rotateY(180deg); 
+		}
+		
+        .card-face { 
+			position: absolute; 
+			width: 100%; height: 100%; 
+			backface-visibility: hidden; 
+			border-radius: 18px; 
+			box-shadow: 0 4px 8px rgba(0,0,0,0.3); 
+			display: flex; 
+			align-items: center; 
+			justify-content: center; 
+			overflow: hidden;
+			top: 0;
+			left: 0;
+		}
+        
+        .card-back { 
+			background: linear-gradient(135deg, #00A2E8 0%, #0077b3 100%); 
+			border: 2px solid #29b6f6; 
+			color: white; 
+			font-weight: bold; 
+			border-radius: 18px; 
+			z-index: 2;
+			width: 100%; height: 100%; 
+			font-size: 38px; 
+		}
+		
+        .card-front { 
+			background-color: #ffffff; 
+			transform: rotateY(180deg); 
+			border: 2px solid #fff; 
+			border-radius: 18px; 
+			z-index: 1; 
+			width: 100%; height: 100%; 
+		}
+		
+        .card-front img { 
+			width: 90%; height: 90%; object-fit: contain; 
+		}
+		
+        button { 
+			background-color: var(--accent-color); 
+			color: white; border: none; padding: 12px 24px; 
+			font-size: 16px; border-radius: 8px; cursor: pointer; 
+			font-weight: bold; transition: 0.2s; margin: 5px; 
+		}
+		button:hover { background-color: #008cd4; transform: translateY(-2px); }
+		
+    </style>
+</head>
+<body>
+
+    <div class="challenge-container" style="margin-top: 20px;">
+        <h2>⏱️ 60秒極限挑戰賽 ⏱️</h2>
+        
+        <!--使用 flex 讓三筆資訊完美並排 -->
+			<div style="display: flex; gap: 15px; justify-content: center; align-items: center; background-color: #1a1a1e; padding: 10px 20px; border-radius: 10px; margin: 5px 0; border: 1px solid #2e2e33; font-weight: bold;">
+            <div style="font-size: 14px; color: #fbbf24;">👤 挑戰玩家：<span id="player-nickname-display" style="color: #ffffff;">神秘人物</span></div>
+            <div style="color: #444;">|</div>
+            <div style="font-size: 14px;">🦖 出賽英雄：<span id="hero-display" style="color:#00A2E8;">卡波</span></div>
+            <div style="color: #444;">|</div>
+            <div style="font-size: 14px; color: var(--accent-color);">⏱️ 剩餘時間：<span id="timer">60</span> 秒</div>
+            <div style="color: #444;">|</div>
+            <div style="font-size: 14px;">🧩 配對：<span id="score" style="color: #4cd964;">0</span> / 8 組</div>
+        </div>
+
+        <div id="game-board"></div>
+
+        <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: center;">
+            <button onclick="resetChallengeGame()" style="background-color: #00A2E8; width: 140px;">重新開始</button>
+            <button onclick="location.href='index.html'" style="background-color: #3a3a40; color: #e1e1e6; border: 1px solid #555; width: 140px;">回首頁</button>
+        </div>
+    </div>
+
+    <script>
+		const capooImages = [
+            "capoo1.png", 
+            "capoo2.png", 
+            "capoo3.png", 
+            "capoo4.png", 
+            "capoo5.png", 
+            "capoo6.png", 
+            "capoo7.png", 
+            "capoo8.png"
+        ];        
+		let timeLeft = 60;
+        let timerInterval;
+        let matchedPairs = 0;
+        let flippedCards = [];
+        let isLockBoard = false;
+
+		window.onload = function() {
+            //去網址列把 ?user= 後面的暱稱挖出來
+            let urlParams = new URLSearchParams(window.location.search);
+            let pNickname = urlParams.get('user') || localStorage.getItem('playerNickname') || '挑戰玩家';
+            
+            localStorage.setItem('playerNickname', pNickname);
+            
+            $('#player-nickname-display').text(pNickname);
+
+            const heroPool = ['貓貓蟲卡波', '狗狗', '咪卡', '兔兔', '黑貓蟲', '奶泡貓', '暴龍姐'];
+            let randomIndex = Math.floor(Math.random() * heroPool.length);
+            let randomHero = heroPool[randomIndex];
+            localStorage.setItem('playerCharName', randomHero);
+            $('#hero-display').text(randomHero);
+            
+            localStorage.setItem('challengeScoreProcessed', 'false');
+            initChallengeBoard();
+            startTimer();
+        };
+
+        function initChallengeBoard() {
+            let $board = $('#game-board').empty();
+            let deck = [...capooImages, ...capooImages];
+            deck.sort(() => Math.random() - 0.5);
+
+            deck.forEach((imgUrl, index) => {
+                let cardHtml = `
+                    <div class="card-container" data-id="${imgUrl}" data-index="${index}">
+                        <div class="card-face card-back">Capoo</div>
+                        <div class="card-face card-front"><img src="${imgUrl}" onerror="this.src='capoo1.png'"></div>
+                    </div>
+                `;
+                $board.append(cardHtml);
+            });
+
+            $('.card-container').click(handleCardClick);
+        }
+
+        function handleCardClick() {
+            if (isLockBoard || $(this).hasClass('flipped')) return;
+            
+            $(this).addClass('flipped');
+            flippedCards.push($(this));
+
+            if (flippedCards.length === 2) {
+                isLockBoard = true;
+                if (flippedCards[0].data('id') === flippedCards[1].data('id')) {
+                    matchedPairs++;
+                    $('#score').text(matchedPairs);
+                    flippedCards = [];
+                    isLockBoard = false;
+                    if (matchedPairs === 8) { clearInterval(timerInterval); saveAndRedirect(); }
+                } else {
+                    setTimeout(() => { 
+                        flippedCards[0].removeClass('flipped'); 
+                        flippedCards[1].removeClass('flipped'); 
+                        flippedCards = []; 
+                        isLockBoard = false; 
+                    }, 800);
+                }
+            }
+        }
+
+		function startTimer() {
+            timerInterval = setInterval(function() {
+                timeLeft--;
+                $('#timer').text(timeLeft);
+                
+                if (timeLeft <= 0) { 
+                    clearInterval(timerInterval); 
+                    //時間到立刻觸發存檔跳轉，不讓數據卡死歸零
+                    saveAndRedirect(); 
+                }
+            }, 1000);
+        }
+
+        function saveAndRedirect() {
+            //最新、最即時的數據
+            localStorage.setItem('gameMode', 'challenge');
+            localStorage.setItem('challengeScore', matchedPairs);
+            localStorage.setItem('challengeTimeLeft', timeLeft < 0 ? 0 : timeLeft); 
+            localStorage.setItem('challengeScoreProcessed', 'false'); 
+            
+            window.location.href = "result.html";
+        }
+		//按下重新開始時觸發的重來邏輯
+        function resetChallengeGame() {
+            clearInterval(timerInterval);
+            
+            timeLeft = 60;
+            matchedPairs = 0;
+            flippedCards = [];
+            isLockBoard = false;
+            
+            $('#timer').text(timeLeft);
+            $('#score').text(matchedPairs);
+            
+            localStorage.setItem('challengeScoreProcessed', 'false');
+            
+            initChallengeBoard();
+            startTimer();
+        }
+    </script>
+</body>
+</html>

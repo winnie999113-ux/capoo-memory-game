@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卡波 AI 記憶對戰完整版</title>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+
+/* ================= 全局 ================= */
+html, body{
+    margin:0;
+    height:100vh;
+    overflow:hidden;
+
+    background: radial-gradient(circle at top, #0f1225, #070812);
+    color:white;
+    font-family:Arial;
+}
+
+/* ================= 左右戰場 ================= */
+body{
+    display:flex;
+    flex-direction:row;
+}
+
+#player-wrap, #ai-wrap{
+    position: relative;
+}
+/* ================= 玩家（左） ================= */
+#player-wrap{
+    flex:1;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    position:relative;
+    border-right:1px solid rgba(255,255,255,0.08);
+}
+#freeze-player, #freeze-ai{
+    display:block;
+}
+/* ================= AI（右） ================= */
+#ai-wrap{
+    flex:1;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    position:relative;
+}
+ 
+/* ================= 標題 ================= */
+h2{
+    margin:8px 0;
+}
+
+/* ================= 棋盤 ================= */
+.board{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:6px;
+
+    width:95%;
+    max-width:520px;
+}
+.combo-pop{
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    font-size: 60px;
+    font-weight: bold;
+    color: #00e5ff;
+    z-index: 9999;
+    pointer-events: none;
+    transition: 0.2s ease;
+}
+.combo-pop.show{
+    transform: translateX(-50%) scale(1);
+}
+/* ================= 卡牌 ================= */
+.card{
+    width:100%;
+    aspect-ratio:2/3;
+
+    max-width:110px;
+
+    perspective:800px;
+    cursor:pointer;
+}
+
+.inner{
+    width:100%;
+    height:100%;
+    position:relative;
+    transform-style:preserve-3d;
+    transition:0.6s;
+}
+
+.card.done{
+    opacity: 0;
+    transform: scale(0.3);
+    filter: blur(4px);
+    transition: 0.5s ease;
+    pointer-events: none;
+}
+
+.card.flipped .inner{
+    transform:rotateY(180deg);
+}
+
+.front, .back{
+    position:absolute;
+    width:100%;
+    height:100%;
+    border-radius:10px;
+    backface-visibility:hidden;
+}
+
+/* 背面 */
+.back{
+    background: linear-gradient(135deg,#00A2E8,#4fd1ff);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+/* 正面 */
+.front{
+    transform:rotateY(180deg);
+    background:white;
+}
+
+.front img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    padding:3px;
+    box-sizing:border-box;
+}
+
+/* ================= AI Queue ================= */
+#ai-queue{
+    position:absolute;
+    right:10px;
+    bottom:10px;
+
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+
+    max-width:220px;
+
+    padding:6px;
+    border-radius:10px;
+
+    background:rgba(0,162,232,0.08);
+    border:1px solid rgba(77,209,255,0.25);
+}
+
+.q-item{
+    width:36px;
+    height:28px;
+    border-radius:5px;
+    overflow:hidden;
+    border:2px solid #4fd1ff;
+}
+
+.q-item img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+/* queue動畫 */
+.q-add{animation: pop 0.3s ease;}
+@keyframes pop{
+    from{transform:scale(0.5);opacity:0;}
+    to{transform:scale(1);opacity:1;}
+}
+
+.q-remove{animation: out 0.3s forwards;}
+@keyframes out{
+    to{transform:translateX(30px) scale(0.5);opacity:0;}
+}
+
+.freeze-overlay{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:9999;
+
+    background: rgba(120, 200, 255, 0.08);
+    backdrop-filter: blur(3px) saturate(1.5);
+
+    animation: freezePulse 1.2s infinite;
+}
+
+@keyframes freezePulse{
+    0%{
+        box-shadow: inset 0 0 20px rgba(100,200,255,0.2);
+    }
+    50%{
+        box-shadow: inset 0 0 50px rgba(150,220,255,0.5);
+    }
+    100%{
+        box-shadow: inset 0 0 20px rgba(100,200,255,0.2);
+    }
+}
+
+.freeze-overlay::before{
+    content:"";
+    position:absolute;
+    width:100%;
+    height:100%;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity:0.4;
+    animation: snowMove 6s linear infinite;
+}
+
+@keyframes snowMove{
+    from{transform:translateY(0);}
+    to{transform:translateY(40px);}
+}
+
+#result-text{
+    animation:zoomIn .5s ease;
+}
+
+@keyframes zoomIn{
+    from{
+        transform:scale(0);
+        opacity:0;
+    }
+    to{
+        transform:scale(1);
+        opacity:1;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= 玩家 ================= -->
+<div id="player-wrap">
+    <h2 id="player-name">🧑 玩家</h2>
+    <div id="player-board" class="board"></div>
+    <div id="freeze-player" class="freeze-overlay" style="display:none;"></div>
+</div>
+
+<!-- ================= AI ================= -->
+<div id="ai-wrap">
+    <h2 id="ai-title">🤖 AI</h2>
+    <div id="ai-board" class="board"></div>
+    <div id="ai-queue"></div>
+    <div id="freeze-ai" class="freeze-overlay" style="display:none;"></div>
+</div>
+
+<div id="result-screen" style="
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.9);
+z-index:9999;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+font-size:60px;
+">
+
+    <div id="result-text"></div>
+
+<div style="
+display:flex;
+gap:20px;
+margin-top:30px;
+">
+
+    <button onclick="location.reload()"
+    style="
+    padding:15px 40px;
+    font-size:24px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    ">
+        再玩一次
+    </button>
+
+    <button onclick="window.location.href='index.html'"
+    style="
+    padding:15px 40px;
+    font-size:24px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    ">
+        回首頁
+    </button>
+
+</div>
+<script>
+
+const imgs = [
+"capoo1.png","capoo2.png","capoo3.png","capoo4.png",
+"capoo5.png","capoo6.png","capoo7.png","capoo8.png"
+];
+
+let pFirst=null;
+let lock=false;
+let pScore=0;
+let aiScore=0;
+let gameOver=false;
+let pCombo = 0;
+let aiCombo = 0;
+let freezeAI = false;
+let freezePlayer = false;
+
+/* ================= AI MEMORY ================= */
+ 
+
+const params = new URLSearchParams(window.location.search);
+const difficulty = params.get("difficulty") || "easy";
+
+const username = params.get("user") || "玩家";
+
+document.getElementById("player-name").textContent =
+    `🧑 ${username}`;
+
+let aiQueue=[];
+const MAX_Q = difficulty === "hard" ? 5 : 3;
+
+/* ================= 初始化 ================= */
+function init(){
+    
+    pScore = 0;
+    aiScore = 0;
+    gameOver = false;
+    $("#ai-board,#player-board,#ai-queue").empty();
+
+    let aiDeck = shuffle([...imgs,...imgs]);
+    let pDeck  = shuffle([...imgs,...imgs]);
+
+    aiDeck.forEach(img=>{
+        $("#ai-board").append(card(img,"ai"));
+    });
+
+    pDeck.forEach(img=>{
+        $("#player-board").append(card(img,"player"));
+    });
+
+    $(".card").off("click").on("click", playerClick);
+
+    setTimeout(aiLoop,1000);
+}
+
+/* ================= 卡牌 ================= */
+function card(img,owner){
+return `
+<div class="card" data-img="${img}" data-owner="${owner}">
+    <div class="inner">
+        <div class="back">★</div>
+        <div class="front"><img src="${img}"></div>
+    </div>
+</div>`;
+}
+
+/* ================= shuffle ================= */
+function shuffle(a){
+    return a.sort(()=>Math.random()-0.5);
+}
+
+/* ================= 玩家 ================= */
+function playerClick(){
+
+    if(lock) return;
+    if(freezePlayer) return;
+    if($(this).data("owner")!=="player") return;
+    if($(this).hasClass("done")) return;
+    if($(this).hasClass("flipped")) return;
+
+    flip(this);
+
+    if(!pFirst){
+        pFirst=this;
+        return;
+    }
+
+    checkPlayer(this);
+}
+
+function flip(c){
+    $(c).addClass("flipped");
+}
+
+/* ================= 比對 ================= */
+function checkPlayer(second){
+
+    lock=true;
+
+    if($(pFirst).data("img") === $(second).data("img")){
+        $(pFirst).add(second).addClass("done");
+        pScore++;
+
+        pCombo++;
+        aiCombo = 0;
+
+        if(pCombo >= 2){
+            freezeAI = true;
+
+            $("#freeze-ai").fadeIn(200);
+
+            setTimeout(()=>{
+                freezeAI = false;
+                $("#freeze-ai").fadeOut(200);
+            }, 3000);
+            pCombo = 0;
+        }
+
+        checkGameOver();
+    }else{
+        pCombo = 0;
+        setTimeout(()=>{
+            $(pFirst).add(second).removeClass("flipped");
+        },700);
+    }
+
+    setTimeout(()=>{
+        pFirst=null;
+        lock=false;
+    },700);
+}
+
+/* ================= queue ================= */
+function addQueue(card){
+
+    let img = $(card).data("img");
+
+    // 同一張牌已經記錄過
+    if(aiQueue.some(item => item.card === card)){
+        return;
+    }
+
+    aiQueue.push({
+        card: card,
+        img: img
+    });
+
+    let el=$(`
+        <div class="q-item q-add">
+            <img src="${img}">
+        </div>
+    `);
+
+    $("#ai-queue").append(el);
+
+    if(aiQueue.length > MAX_Q){
+
+        aiQueue.shift();
+
+        $("#ai-queue .q-item")
+            .first()
+            .addClass("q-remove");
+
+        setTimeout(()=>{
+            $("#ai-queue .q-item.q-remove")
+                .first()
+                .remove();
+        },300);
+    }
+}
+
+function removeFromQueue(img){
+
+    aiQueue = aiQueue.filter(
+        item => item.img !== img
+    );
+
+    $("#ai-queue .q-item").each(function(){
+
+        if($(this).find("img").attr("src") === img){
+
+            $(this).addClass("q-remove");
+
+            setTimeout(()=>{
+                $(this).remove();
+            },300);
+        }
+    });
+}
+
+/* ================= AI ================= */
+function findMatch(){
+
+    for(let i=0;i<aiQueue.length;i++){
+
+        for(let j=i+1;j<aiQueue.length;j++){
+
+            if(
+                aiQueue[i].img === aiQueue[j].img &&
+                aiQueue[i].card !== aiQueue[j].card
+            ){
+                return aiQueue[i].img;
+            }
+        }
+    }
+
+    return null;
+}
+
+function showCombo(n){
+    let el = $(`<div class="combo-pop">COMBO x${n}</div>`);
+    $("body").append(el);
+
+    setTimeout(()=>el.addClass("show"),10);
+    setTimeout(()=>el.remove(),500);
+}
+
+function aiLoop(){
+
+    if(gameOver) return;
+
+    if(freezeAI){
+        setTimeout(aiLoop, 300);
+        return;
+    }
+    let cards=$("#ai-board .card").not(".done");
+
+    if(cards.length<2) return;
+
+    let match=findMatch();
+
+    let c1,c2;
+
+    if(match){
+
+        let same=cards.filter(function(){
+            return $(this).data("img")===match;
+        });
+
+        c1=same[0];
+        c2=same[1];
+
+    }else{
+        c1=cards[Math.floor(Math.random()*cards.length)];
+    }
+
+    flip(c1);
+    addQueue(c1);
+
+    setTimeout(()=>{
+
+        let cards2=$("#ai-board .card").not(".done").not(c1);
+
+        c2 = c2 || cards2[Math.floor(Math.random()*cards2.length)];
+
+        flip(c2);
+        addQueue(c2);
+
+        setTimeout(()=>{
+
+            let isMatch = $(c1).data("img") === $(c2).data("img");
+
+            if(isMatch){
+                $(c1).add(c2).addClass("done");
+                aiScore++;
+
+                removeFromQueue($(c1).data("img"));
+             }else{
+                $(c1).add(c2).removeClass("flipped");
+        }
+
+            // ⭐⭐⭐ 重點：回合結束才算 combo
+            if(isMatch){
+                aiCombo++;
+                showCombo(aiCombo);
+                pCombo = 0;
+            }else{
+                aiCombo = 0;
+                pCombo = 0;
+            }
+
+            // ❄ freeze 判斷（不變）
+            if(aiCombo >= 2){
+                freezePlayer = true;
+
+                $("#freeze-player").fadeIn(100);
+
+                setTimeout(()=>{
+                    freezePlayer = false;
+                    $("#freeze-player").fadeOut(200);
+                }, 3000);
+
+                aiCombo = 0;
+            }
+
+            //removeFromQueue($(c1).data("img"));
+            checkGameOver();
+
+            setTimeout(aiLoop,800);
+
+        },600);
+
+    },600);
+}
+
+document.getElementById("ai-title").innerHTML =
+    difficulty === "hard"
+    ? "🤖 AI（困難｜記憶5張）"
+    : "🤖 AI（簡單｜記憶3張）";
+
+function checkGameOver(){
+
+    if(gameOver) return;
+
+    let text="";
+
+    // 玩家先完成
+    if(pScore >= 8){
+
+        gameOver = true;
+        text = "🎉 VICTORY";
+
+    }
+    // AI先完成
+    else if(aiScore >= 8){
+
+        gameOver = true;
+        text = "💀 LOSE";
+
+    }
+    else{
+        return;
+    }
+
+    $("#result-text").html(`
+        ${text}<br>
+        <div style="font-size:30px;margin-top:20px">
+            ${username}：${pScore} 對<br>
+            AI：${aiScore} 對
+        </div>
+    `);
+
+    $("#result-screen").css("display","flex");
+}
+
+
+init();
+
+</script>
+ 
+</body>
+</html>

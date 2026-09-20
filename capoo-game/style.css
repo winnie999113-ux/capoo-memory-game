@@ -1,0 +1,400 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    background:#121214;
+    color:#e1e1e6;
+    font-family:"Segoe UI", Arial, sans-serif;
+}
+
+/* 頁首 */
+header{
+    width:100%;
+}
+
+/* 導覽列 */
+.full-nav{
+    display:flex;
+    width:100%;
+    background:#1a1a1e;
+    border-bottom:2px solid #00A2E8;
+    box-shadow:0 4px 10px rgba(0,0,0,.3);
+}
+
+.full-nav a{
+    flex:1;
+    text-align:center;
+    padding:15px 0;
+    color:#e1e1e6;
+    text-decoration:none;
+    font-weight:bold;
+    font-size:14px;
+    transition:.3s;
+    border-right:1px solid #2e2e33;
+}
+
+.full-nav a:last-child{
+    border-right:none;
+}
+
+.full-nav a:hover{
+    background:#25252b;
+    color:#00A2E8;
+}
+
+/* Hero */
+.hero{
+    max-width:1350px;
+    margin:35px auto;
+    padding:60px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:linear-gradient(135deg,#071a2b,#003a5c);
+    border-radius:30px;
+    box-shadow:0 0 35px rgba(0,162,232,.25);
+}
+
+.hero-text{
+    max-width:720px;
+}
+
+.tag{
+    color:#00A2E8;
+    font-weight:bold;
+    margin-bottom:20px;
+}
+
+.hero h1{
+    font-size:36px;
+    margin-bottom:25px;
+    line-height:1.3;
+}
+
+.hero p{
+    line-height:2;
+}
+
+.hero-buttons{
+    margin-top:10px;
+}
+
+/* 按鈕 */
+button{
+    border:none;
+    background:#00A2E8;
+    color:white;
+    padding:14px 30px;
+    border-radius:10px;
+    font-size:17px;
+    font-weight:bold;
+    cursor:pointer;
+    margin-top:25px;
+    transition:.3s;
+}
+
+button:hover{
+    transform:translateY(-3px);
+    background:#008cd4;
+}
+
+.gray-btn{
+    background:#3a3a40;
+    margin-left:12px;
+}
+
+/* Hero 咖波大圖 */
+.hero-card{
+    text-align:center;
+}
+
+.big-card{
+    width:260px;
+    height:260px;
+    border-radius:50%;
+    background:radial-gradient(circle, #ffffff 0%, #ffffff 58%, #00A2E8 59%, #0077b3 100%);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    box-shadow:
+        0 0 25px rgba(0,162,232,.9),
+        0 0 60px rgba(0,162,232,.45);
+    animation:capooFloat 3s infinite ease-in-out;
+}
+
+.big-card img{
+    width:80%;
+    height:80%;
+    object-fit:contain;
+}
+
+.hero-card p{
+    margin-top:18px;
+    color:#dcdcdc;
+}
+
+@keyframes capooFloat{
+    0%{ transform:translateY(0); }
+    50%{ transform:translateY(-15px); }
+    100%{ transform:translateY(0); }
+}
+
+/* 主版面 */
+.layout{
+    max-width:1350px;
+    margin:0 auto;
+    padding:0 20px 40px;
+    display:flex;
+    align-items:flex-start;
+    gap:30px;
+}
+
+/* 側邊廣告 */
+.side-ad{
+    width:300px;
+    min-width:300px;
+    height:auto;
+    align-self:flex-start;
+
+    background:#1f1f23;
+    border-radius:24px;
+    padding:28px;
+
+    position:sticky;
+    top:90px;
+
+    overflow:hidden;
+    box-shadow:0 0 25px rgba(0,0,0,.45);
+}
+
+.ad-poster{
+    width:100%;
+    height:160px;
+    object-fit:cover;
+    border-radius:12px;
+    margin-bottom:18px;
+    box-shadow:0 0 15px rgba(0,162,232,.35);
+}
+
+.ad-title{
+    color:#888;
+    font-size:12px;
+    margin-bottom:25px;
+}
+
+.side-ad h3{
+    color:#00A2E8;
+    margin-bottom:20px;
+}
+
+.side-ad p{
+    color:#c9c9c9;
+    line-height:1.9;
+}
+
+/* 主內容 */
+main{
+    flex:1;
+}
+
+/* 一般區塊 */
+.section-box{
+    background:#1f1f23;
+    border-radius:24px;
+    padding:38px;
+    margin-bottom:30px;
+    box-shadow:0 0 18px rgba(0,0,0,.25);
+}
+
+.section-box h2{
+    color:#00A2E8;
+    margin-bottom:20px;
+    font-size:30px;
+}
+
+.section-box p{
+    line-height:2;
+}
+
+.section-box ul{
+    margin-left:25px;
+    line-height:2.2;
+}
+
+/* 功能卡片 */
+.features{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:24px;
+    margin-bottom:30px;
+}
+
+.feature-card{
+    background:#1f1f23;
+    border-radius:24px;
+    padding:32px;
+    min-height:180px;
+    transition:.3s;
+    box-shadow:0 0 18px rgba(0,0,0,.25);
+}
+
+.feature-card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 0 25px rgba(0,162,232,.25);
+}
+
+.feature-card h3{
+    color:#00A2E8;
+    font-size:24px;
+    margin-bottom:15px;
+}
+
+.feature-card p{
+    color:#d0d0d0;
+    line-height:1.9;
+}
+
+/* 角色預覽 */
+.sub-text{
+    color:#aaa;
+    margin-bottom:25px;
+}
+
+.character-preview{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:24px;
+    margin-top:25px;
+}
+
+.char-card{
+    background:#16161a;
+    border-radius:22px;
+    padding:28px;
+    text-align:center;
+    transition:.3s;
+}
+
+.char-card:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 25px rgba(0,162,232,.25);
+}
+
+.char-img{
+    width:130px;
+    height:130px;
+    margin:0 auto 18px;
+    border-radius:50%;
+    background:#ffffff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:visible;
+    box-shadow:
+        0 0 18px rgba(0,162,232,.6),
+        inset 0 0 0 4px #00A2E8;
+}
+
+.char-img img{
+    width:70%;
+    height:70%;
+    object-fit:contain;
+}
+
+.char-card h3{
+    color:#00A2E8;
+    margin-bottom:12px;
+}
+
+.char-card p{
+    color:#cfcfcf;
+    line-height:1.8;
+}
+
+/* 頁尾 */
+footer{
+    background:#1a1a1e;
+    border-top:2px solid #00A2E8;
+    text-align:center;
+    padding:35px;
+    margin-top:30px;
+}
+
+footer h3{
+    color:#00A2E8;
+    margin-bottom:12px;
+}
+
+/* RWD */
+@media(max-width:1000px){
+    .hero{
+        flex-direction:column;
+        text-align:center;
+        gap:40px;
+        padding:40px 25px;
+    }
+
+    .layout{
+        flex-direction:column;
+    }
+
+    .side-ad{
+        width:100%;
+        min-width:0;
+        position:static;
+    }
+
+    .features,
+    .character-preview{
+        grid-template-columns:1fr;
+    }
+
+    .full-nav{
+        flex-wrap:wrap;
+    }
+
+    .full-nav a{
+        flex:1 1 50%;
+    }
+}
+.footer-contact{
+    display:flex;
+    justify-content:center;
+    gap:50px;
+    margin:25px 0;
+    flex-wrap:wrap;
+}
+
+.contact-item{
+    background:#16161a;
+    padding:15px 25px;
+    border-radius:12px;
+    min-width:220px;
+    line-height:1.8;
+    transition:.3s;
+}
+
+.contact-item:hover{
+    transform:translateY(-5px);
+    box-shadow:0 0 15px rgba(0,162,232,.3);
+}
+
+footer hr{
+    border:none;
+    border-top:1px solid #444;
+    margin:25px auto;
+    width:80%;
+}
+
+footer p{
+    color:#bfbfbf;
+    margin:6px 0;
+}

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>戰果結算 - 卡波記憶翻牌大作戰</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #121214;
+            --text-color: #e1e1e6;
+            --accent-color: #ff3b30; 
+            --capoo-blue: #00A2E8;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            padding-top: 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 固定導覽列 */
+        nav { 
+            position: fixed; top: 0; left: 0; width: 100%; background: #1a1a1e; 
+            padding: 15px 0; text-align: center; border-bottom: 2px solid var(--accent-color); z-index: 999; 
+        }
+        nav a { color: var(--text-color); text-decoration: none; margin: 0 10px; font-weight: bold; }
+        nav a.active { color: var(--accent-color); }
+
+        /* 結算大卡片外框 */
+        .result-box {
+            background-color: #1f1f23;
+            border: 2px solid #333;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            margin-top: 30px;
+        }
+
+        h2 { color: var(--accent-color); text-shadow: 0 0 12px rgba(255,59,48,0.3); font-size: 32px; margin-bottom: 25px; }
+        
+        .score-info {
+            background-color: #16161a;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid var(--capoo-blue);
+            text-align: left;
+        }
+
+        .score-info p { font-size: 18px; margin: 10px 0; color: #aaa; }
+        .score-info span { font-weight: bold; color: var(--text-color); font-size: 20px; }
+        .highlight-win { color: #4cd964 !important; }
+        .highlight-time { color: #ffcc00 !important; }
+
+        .btn-group { display: flex; gap: 15px; justify-content: center; margin-top: 30px; }
+        
+        button {
+            border: none; padding: 14px 28px; font-size: 16px; border-radius: 10px; 
+            cursor: pointer; font-weight: bold; transition: 0.2s; width: 140px;
+        }
+        .btn-retry { background-color: var(--capoo-blue); color: white; }
+        .btn-retry:hover { background-color: #008cd4; transform: scale(1.05); }
+        
+        .btn-rank { background-color: #3a3a40; color: #e1e1e6; border: 1px solid #555; }
+        .btn-rank:hover { background-color: #4a4a52; transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+    <div class="result-box">
+        <h2>🏆 挑戰賽戰果結算 🏆</h2>
+        
+        <div class="score-info">
+        <div style="margin-bottom: 12px; font-size: 16px; text-align: left;">
+            玩家暱稱：<span id="player-nickname" style="color: #ffffff; font-weight: bold;">挑戰玩家</span>
+        </div>
+            <p>出賽英雄：<span id="res-hero">貓貓蟲卡波</span></p>
+            <p>遊戲模式：<span style="color: var(--accent-color);">60秒極限挑戰賽</span></p>
+            <p>成功配對：<span id="res-score" class="highlight-win">0</span> / 8 組</p>
+            <p>剩餘時間：<span id="res-time" class="highlight-time">0</span> 秒</p>
+        </div>
+
+	<div class="btn-group">
+            <button class="btn-retry" onclick="location.href='challenge.html'">再挑戰一次</button>
+            <button class="btn-rank" onclick="location.href='leaderboard.html'">查看排行榜</button>
+            <button onclick="location.href='index.html'" style="background-color: #3a3a40; color: #e1e1e6; border: 1px solid #555; width: 140px;">回首頁</button>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            let pNickname = localStorage.getItem('playerNickname') || '挑戰玩家';
+            if (document.getElementById("player-nickname")) {
+                document.getElementById("player-nickname").innerText = pNickname;
+            }
+
+            let latestHero = localStorage.getItem('playerCharName') || '貓貓蟲卡波';
+            if (document.getElementById("res-hero")) {
+                document.getElementById("res-hero").innerText = latestHero;
+            }
+
+            let latestScore = localStorage.getItem('challengeScore');
+            if (latestScore !== null && document.getElementById("res-score")) {
+                document.getElementById("res-score").innerText = latestScore;
+            }
+
+            let latestTimeLeft = localStorage.getItem('challengeTimeLeft');
+            if (latestTimeLeft !== null && document.getElementById("res-time")) {
+                document.getElementById("res-time").innerText = latestTimeLeft;
+            }
+        };
+    </script>
+</body>
+</html>

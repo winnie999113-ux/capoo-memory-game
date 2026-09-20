@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>卡波記憶翻牌大作戰 - 角色介紹</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #121214;
+            --text-color: #e1e1e6;
+            --accent-color: #4da6ff; /*亮藍色*/
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Roboto, sans-serif;/* 設定英中文字型順序 */
+            margin: 0;
+            padding: 20px;
+            padding-top: 80px;
+            display: flex;/* 啟用 Flexbox 排版 ，讓網頁裡的所有東西都垂直置中排列 */
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        h2 { color: var(--accent-color); text-shadow: 0 0 10px rgba(77,166,255,0.3); margin-bottom: 5px; }
+
+        /*3D旋轉木馬的外框舞台: 加大透視感，調高寬度*/
+        .stage-3d {
+            width: 300px;
+            height: 380px;
+            perspective: 2000px; /* 拉高透視值，確保卡片不會因太近被裁切 */
+            margin: 30px auto 10px;
+            position: relative;							  /*絕對定位*/
+        }
+		
+		/*實際會旋轉的旋轉盤(絕對定位/保持 3D 立體空間/貝茲曲線(彈簧回彈)*/
+        .carousel-3d {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+        }
+
+        /*角色卡牌基礎設定 (精準重設絕對定位與動畫軸點)*/
+        .character-card-3d {
+            position: absolute;
+            width: 160px; /* 初始圓圈大頭貼大小 */
+            height: 160px; 
+            left: 50%;
+            top: 50%;
+            margin-left: -80px;
+            margin-top: -80px; 
+            background: #1f1f23;
+            border: 2px solid #333;
+            border-radius: 50%; /* 初始完美圓形 */
+            padding: 10px;
+            display: flex;
+            flex-direction: column;/*Flexbox 內部元素排版 (讓圖片文字乖乖待在中間)*/
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            /* 平滑變化過渡 */
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), 			  /*3D 空間移動、貝茲曲線/
+                        border-color 0.4s, opacity 0.4s, background-color 0.4s,
+                        width 0.4s, height 0.4s, border-radius 0.4s, margin-left 0.4s, margin-top 0.4s;
+            opacity: 0.25; /* 預設非焦點的角色會變得很透明，凸顯主角 */
+            cursor: pointer;
+        }
+
+        /* 正中間焦點角色提示 */
+        .character-card-3d.active-char {
+            border-color: #26476c;
+            opacity: 0.9;
+        }
+
+        /*點擊彈出：一邊往前暴衝，一邊向四周延展成高質感方卡*/
+        .character-card-3d.pop-out {
+            width: 280px;
+            height: 360px;
+            margin-left: -140px; /* 展開後的新一半寬度 */
+            margin-top: -180px;  /* 展開後的新一半高度 */
+            border-radius: 20px; 
+            background-color: #24252a;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 35px rgba(77,166,255,0.6);			/*發光效果*/
+            opacity: 1 !important;								/*強制透明度 100% 完全顯示*/
+            z-index: 100;										/*浮在最上層*/
+        }
+
+        /* 大頭貼圖案 */
+        .character-card-3d img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            border-radius: 50%;
+            background: #fff;
+            padding: 5px;
+            border: 3px solid var(--accent-color);
+            flex-shrink: 0;
+            transition: 0.4s;
+        }
+
+        /* 點擊展開後，圖片稍微調整比例騰出空間給文字 */
+        .character-card-3d.pop-out img {
+            width: 110px;
+            height: 110px;
+        }
+        /* 隱藏文字容器 */
+        .character-info-content {
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: opacity 0.2s ease-out, max-height 0.4s ease-out, margin-top 0.4s;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* 點擊彈出後，文字順滑向下伸展浮現 */
+        .character-card-3d.pop-out .character-info-content {
+            opacity: 1;
+            max-height: 220px;
+            margin-top: 15px;
+        }
+
+        .character-card-3d h3 { color: var(--accent-color); margin: 0 0 8px 0; font-size: 20px; }
+        .character-card-3d p { color: #aaa; font-size: 14px; line-height: 1.5; height: 120px; overflow-y: auto; padding: 0 5px; margin: 0; }
+
+        .controls { display: flex; gap: 20px; margin-top: 30px; z-index: 10; }/*控制按鈕區塊排版*/
+        button {
+            background-color: #00A2E8; color: white; border: none; padding: 12px 24px;
+            font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s;
+        }
+        button:hover { background-color: #008cd4; transform: scale(1.05); }  /* 滑鼠懸停時微放大並變深色 */
+    </style>
+</head>
+<body>
+
+    <h2>ᓚ₍ ^. .^₎ 咖波群星大圖鑑ᓚ₍ ^. .^₎ </h2>
+    <p style="color: #aaa; font-size: 14px;">左右切換角色，【點擊正中間圓形頭貼】展開詳細介紹</p>
+
+    <div class="stage-3d">
+        <div class="carousel-3d" id="carousel"></div>
+    </div>
+
+    <div class="controls">
+        <button id="prev-btn">◀ 上一個角色</button>
+        <button id="next-btn">下一個角色 ▶</button>
+		<button onclick="location.href='index.html'" style="background-color: #3a3a40; color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;">回首頁</button>
+    </div>
+
+    <script> //建立一個陣列，包含 15 個物件
+        const characters = [
+            { name: "狗狗", img: "DOG.2.png", desc: "一隻再生能力很強的生物，個性很溫和，呆呆的，很萬能沒有什麼事情可以難得倒他。是咖波最愛的朋友兼糧食。" },
+            { name: "兔兔", img: "900x.webp", desc: "超級喜歡咖波的兔子，就算一直被吞食還是很想跟咖波在一起。" },
+            { name: "拉拉", img: "拉拉.webp", desc: "收養咖波與狗狗的主人，唯一可以制伏咖波的人，咖波做蠢事時會揍他。" },
+            { name: "小雞", img: "小雞.webp", desc: "糧食般的存在,數量超多吃都吃不完。" },
+            { name: "咪卡", img: "咪卡.webp", desc: "雜食性的貓貓蟲，除了肉也會吃蔬菜。體型較小，軟綿綿的，個性害羞膽小，跟咖波情同兄妹般的存在。" },
+            { name: "奶泡貓", img: "奶泡貓.webp", desc: "奶泡貓是一杯會動卡布奇諾,長得像貓跟蝸牛,非常熱愛咖啡,也很擅長冲煮咖啡,夢想是調製出自己心目中的極致美味特調咖啡。" },
+            { name: "暴龍姐", img: "暴龍姐.webp", desc: "雖然很大隻但是很弱的母暴龍，常常被咖波搶走食物，跟咖波是好朋友。" },
+            { name: "死神貓蟲", img: "死神貓蟲.webp", desc: "一心想做好自己工作的死神貓蟲，但總是失敗。" },
+            { name: "黑貓蟲", img: "黑貓蟲.webp", desc: "咖波的死對頭，常常跟咖波打架，但也是好朋友，都會帶著他的弟弟黑貓蟲寶寶一起行動。" },
+            { name: "黑貓蟲寶寶", img: "黑貓蟲寶寶.webp", desc: "黑貓蟲的弟弟，總是獲得大家的寵愛，哭的時候可以破壞一切事物。" },
+            { name: "僵屍貓蟲", img: "殭屍貓蟲.webp", desc: "因為身體總是臭臭的，常常讓大家不敢靠近，其實非常想跟大家一起玩，咖波與狗狗總是會捏著鼻子邀請大家跟他一起玩耍。" },
+            { name: "北極熊", img: "北極熊.webp", desc: "總是在打工的大白熊，常常會出現在各個工作場所。" },
+            { name: "果凍人", img: "果凍人.webp", desc: "路人甲。" },
+            { name: "小八", img: "小八.png", desc: "在海裡生活的可愛小八，有時會被咖波做成章魚燒。" },
+            { name: "小海豹", img: "小海豹.webp", desc: "常常跟北極熊一起打工，現在常駐在奶泡貓咖啡當正職。" }
+        ];
+
+        let currentIndex = 0; 
+        const rotateAngle = 360 / characters.length;  // 算出一張卡片該旋轉的角度：360度 / 15張貼紙 = 24度
+        const radiusZ = 450; // 將圓環半徑縮攏到黃金450px，確保100%在舞台可視範圍內現形
+
+        window.onload = function() {
+            let $carousel = $('#carousel'); // 取得裝卡片的3D圓環容器
+			
+			//使用 forEach 迴圈，把 characters 陣列裡的每隻角色依序拿出來幫他們製作專屬的3D卡片(HTML)並排好
+            characters.forEach((char, i) => {
+                let cardHtml = `
+                    <div class="character-card-3d" id="char-${i}" data-idx="${i}" style="transform: rotateY(${i * rotateAngle}deg) translateZ(${radiusZ}px);">
+                        <img src="${char.img}" alt="${char.name}" onerror="this.src='capoo1.png'">
+                        <div class="character-info-content">
+                            <h3>${char.name}</h3>
+                            <p>${char.desc}</p>
+                        </div>
+                    </div>
+                `;
+                $carousel.append(cardHtml); //把卡片塞進叫做 #carousel（旋轉木馬舞台）的HTML容器裡面
+            });
+
+            updateCardStates();
+
+            // 導覽按鈕控制
+            $('#prev-btn').click(() => {
+                currentIndex = (currentIndex - 1 + characters.length) % characters.length;
+                updateCarousel();
+            });
+
+            $('#next-btn').click(() => {
+                currentIndex = (currentIndex + 1) % characters.length;
+                updateCarousel();
+            });
+
+            // 點擊彈出/收回事件
+            $('.character-card-3d').click(function() {
+                let clickedIdx = $(this).data('idx');
+                
+                if (clickedIdx === currentIndex) {
+                    if ($(this).hasClass('pop-out')) {
+                        $(this).removeClass('pop-out');
+                        $(this).css('transform', `rotateY(${clickedIdx * rotateAngle}deg) translateZ(${radiusZ}px)`);
+                    } else {
+                        $('.character-card-3d').removeClass('pop-out');
+                        updateCardStates(); 
+                        $(this).addClass('pop-out');
+                        // 往前跳出的 3D 深度距離
+                        $(this).css('transform', `rotateY(${clickedIdx * rotateAngle}deg) translateZ(580px)`);
+                    }
+                }
+            });
+        };
+
+        function updateCarousel() {
+            let targetDegree = currentIndex * -rotateAngle;
+            $('#carousel').css('transform', `rotateY(${targetDegree}deg)`);
+            updateCardStates();
+        }
+
+        function updateCardStates() {
+            $('.character-card-3d').each(function() {
+                let idx = $(this).data('idx');
+                $(this).removeClass('active-char pop-out');
+                $(this).css('transform', `rotateY(${idx * rotateAngle}deg) translateZ(${radiusZ}px)`);
+            });
+            $(`#char-${currentIndex}`).addClass('active-char');
+        }
+    </script>
+</body>
+</html>

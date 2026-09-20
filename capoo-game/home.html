@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>卡波記憶翻牌大作戰</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 🎯 讓整個網頁的滾動變得超級平滑絲滑 */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* 🚀 專屬追加樣式：強迫導覽列完美均分並排滿整個畫面 */
+        .full-nav {
+            display: flex;
+            width: 100%;
+            background-color: #1a1a1e;
+            border-bottom: 2px solid #00A2E8;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            padding: 0;
+            margin: 0;
+            list-style: none;
+            /* 讓導覽列固定在頂部，或者維持原樣。這裡配合你原本的排版維持原樣 */
+        }
+
+        .full-nav a {
+            flex: 1; /* 🎯 關鍵：讓所有按鈕自動均分，完美塞滿整排 */
+            text-align: center;
+            padding: 15px 0;
+            color: #e1e1e6;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background 0.3s, color 0.3s;
+            border-right: 1px solid #2e2e33; /* 代替原本的豎線分隔，更具科技感 */
+        }
+
+        .full-nav a:last-child {
+            border-right: none; /* 最後一個去掉邊框 */
+        }
+
+        .full-nav a:hover {
+            background-color: #25252b;
+            color: #00A2E8;
+        }
+
+        .full-nav a.active {
+            background-color: #00A2E8;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+	<header style="display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 25px; padding: 25px 20px; background: #121214; width: 100%; box-sizing: border-box; flex-wrap: wrap;">
+        
+        <h1 style="color: #00A2E8; text-shadow: 0 0 15px rgba(0, 162, 232, 0.6); font-size: 32px; margin: 0; font-weight: bold; letter-spacing: 2px;">
+             卡波記憶翻牌大作戰 
+        </h1>
+        
+        <p style="color: #888896; font-size: 13px; margin: 0; padding-top: 8px; letter-spacing: 1px; font-weight: 500; white-space: nowrap;">
+            HTML5 × CSS3 × JavaScript 期末專題作品
+        </p>
+    </header>
+
+    <!-- 🚀 導覽列大改裝：全部改為單頁式錨點連結，自動平滑滾動到下方對應主題 -->
+	<nav class="full-nav">
+        <a href="#intro">🎮 遊戲介紹</a>
+        <a href="#features">✨ 操作說明</a>
+        <a href="#rules">📌 遊戲規則</a>
+        <a href="#characters">🐾 角色預覽</a>
+    </nav>
+
+    <!-- 🎯 加上 id="welcome"，點擊首頁頂部就會滾回這裡 -->
+    <section class="hero" id="welcome">
+        <div class="hero-text">
+            <p class="tag">HTML × CSS × JavaScript × jQuery</p>
+            <h1 style="color: #ffffff; font-size: 36px; margin: 15px 0; text-align: left;">
+                WELCOME TO GAME
+            </h1>
+            <p>
+                這是一款以卡波角色為主題的記憶翻牌遊戲，
+                結合角色介紹、AI 對戰、60 秒挑戰與排行榜功能，
+                讓玩家在可愛又刺激的畫面中挑戰自己的記憶力。
+            </p>
+
+            <!-- 🎯 點擊依然會跳轉到實體遊戲與排行榜頁面 -->
+		<div class="hero-buttons">
+                <button onclick="location.href='index.html'">進入遊戲</button>
+                 
+            </div>
+        </div>
+
+        <div class="hero-card">
+			<div class="big-card">
+				<img src="capoo1.png" alt="咖波">
+			</div>
+			<p>記憶力 × 反應力 × 趣味挑戰</p>
+		</div>
+    </section>
+
+<div class="layout">
+
+    <aside class="side-ad">
+
+        <img src="images/ad.png" alt="咖波10週年特展" class="ad-poster">
+
+        <p class="ad-title">SIDE AD</p>
+
+        <h3>🎉 咖波 10 週年特展</h3>
+
+        <p>
+            📅 展覽日期<br>
+            2024/06/29 ～ 2024/09/15
+        </p>
+
+        <p>
+            📍 展覽地點<br>
+            華山1914文創園區 東2A、東2B館
+        </p>
+
+        <p>
+            🕙 開放時間<br>
+            10:00 AM ～ 06:00 PM
+        </p>
+
+        <a href="https://www.huashan1914.com/w/huashan1914/exhibition_24060910242836352"
+   target="_blank">
+    <button class="ad-btn">
+        更多資訊
+    </button>
+</a>
+
+    </aside>
+	
+        <main>
+            <!-- 🎯 綁定 id="intro" -->
+            <section class="section-box" id="intro">
+                <h2>🎮 遊戲介紹</h2>
+                <p>
+                    本遊戲除了基本翻牌模式外，也加入了 AI 對戰與 60 秒挑戰模式。玩家可以選擇不同難度與 AI 進行對戰，比較雙方的配對數量；也可以挑戰限時模式，在倒數時間內盡可能完成更多配對，爭取更高的分數與排名。
+
+遊戲整體採用深色科技風格設計，搭配咖波家族角色圖片、動畫效果與排行榜系統，希望讓玩家在輕鬆有趣的環境中享受翻牌遊戲帶來的樂趣與挑戰。
+                </p>
+            </section>
+
+            <!-- 🎯 綁定 id="features" -->
+            <section class="features" id="features">
+                <div class="feature-card">
+                    <h3>🎴 翻牌配對</h3>
+                    <p>玩家一次翻開兩張牌，找出相同圖片即可成功配對。</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3>🤖 AI 對戰</h3>
+                    <p>加入 AI 對手設定，讓玩家可以進行人機對戰。</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3>⏱️ 60 秒挑戰</h3>
+                    <p>在限定時間內完成最多配對，增加緊張感。</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3>🏆 排行榜</h3>
+                    <p>紀錄玩家挑戰成績，呈現排名與分數。</p>
+                </div>
+            </section>
+
+            <!-- 🎯 綁定 id="characters" -->
+            <section class="section-box" id="characters">
+                <h2>🐾 角色介紹預覽</h2>
+                <p class="sub-text">首頁先展示部分角色，完整角色介紹可由上方導覽列進入。</p>
+
+                <div class="character-preview">
+                    <div class="char-card">
+                        <div class="char-img">
+                            <img src="capoo1.png">
+                        </div>
+                        <h3>咖波</h3>
+                        <p>主角角色，外型可愛又充滿活力，是遊戲的代表角色。</p>
+                    </div>
+
+                    <div class="char-card">
+                        <div class="char-img">
+                            <img src="DOG.2.png">
+                        </div>
+                        <h3>狗狗</h3>
+                        <p>溫和又可靠的角色，在卡波世界中有重要的位置。</p>
+                    </div>
+
+					<div class="char-card">
+						<div class="char-img">
+							<img src="900x.webp" alt="兔兔">
+						</div>
+						<h3>兔兔</h3>
+						<p>可愛的角色之一，讓整體遊戲畫面更活潑。</p>
+					</div>
+            </section>
+
+            <!-- 🎯 綁定 id="rules" -->
+            <section class="section-box" id="rules">
+                <h2>📌 遊戲規則</h2>
+                <ul>
+                    <li>玩家每次可以翻開兩張卡牌。</li>
+                    <li>如果兩張圖片相同，就成功配對並獲得分數.</li>
+                    <li>如果圖片不同，卡牌會自動翻回去。</li>
+                    <li>60 秒挑戰模式會計算成功配對組數與剩餘時間。</li>
+                    <li>排行榜會依照挑戰結果進行排序。</li>
+                </ul>
+            </section>
+
+            <!-- 🎯 綁定 id="tech" -->
+            <section class="features" id="tech">
+                <div class="feature-card">
+                    <h3>HTML5</h3>
+                    <p>負責網頁架構、內容區塊與頁面排版。</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3>CSS3</h3>
+                    <p>負責深色主題、動畫、卡片效果與響應式設計。</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3>JavaScript</h3>
+                    <p>負責遊戲互動、分數計算與頁面控制。</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3>jQuery</h3>
+                    <p>簡化點擊事件與畫面元素操作。</p>
+                </div>
+            </section>
+
+            <!-- 🎯 綁定 id="project-desc" -->
+            <section class="section-box" id="project-desc">
+                <h2>📢 專題說明</h2>
+                <p>
+                    本首頁主要負責整個網站的入口設計，包含頁首導覽列、
+                    側邊廣告、遊戲介紹、角色介紹預覽、功能特色與使用技術說明。
+                    使用者進入首頁後，可以快速了解本專題的主題、玩法與主要功能。
+                </p>
+            </section>
+        </main>
+    </div>
+
+<footer>
+
+    <h3>📬 聯絡我們</h3>
+
+    <div class="footer-contact">
+
+        <div class="contact-item">
+            🐱 <strong>咖波 Capoo</strong><br>
+            capoo@memorygame.com
+        </div>
+
+        <div class="contact-item">
+            🐶 <strong>狗狗 Dog</strong><br>
+            dog@memorygame.com
+        </div>
+
+        <div class="contact-item">
+            🐰 <strong>兔兔 Rabbit</strong><br>
+            rabbit@memorygame.com
+        </div>
+
+    </div>
+
+    <hr>
+
+    <p>卡波記憶翻牌大作戰 © 2026</p>
+    <p>HTML5 × CSS3 × JavaScript 期末專題作品</p>
+
+</footer>
+
+</body>
+</html>

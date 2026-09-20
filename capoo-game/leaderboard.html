@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>挑戰賽排行 - 卡波記憶翻牌大作戰</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #121214;
+            --text-color: #e1e1e6;
+            --accent-color: #ff3b30; /* 保持 60秒挑戰賽的熱血紅色調 */
+            --capoo-blue: #00A2E8;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            padding-top: 90px; /* 預留給固定導覽列的緩衝 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /*  排行榜大卡片外框 */
+        .leaderboard-box {
+            background-color: #1f1f23;
+            border: 2px solid #333;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 650px; /* 配合大棋盤的 650px 黃金寬度 */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            margin-top: 20px;
+        }
+
+        .leaderboard-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h2 { color: var(--accent-color); text-shadow: 0 0 12px rgba(255,59,48,0.3); font-size: 32px; margin: 0; }
+        .subtitle { color: #aaa; font-size: 14px; margin-top: 8px; }
+
+        /*  排行榜表格樣式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #2e2e33;
+        }
+
+        th {
+            background-color: #16161a;
+            color: var(--capoo-blue);
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        td {
+            font-size: 16px;
+            color: #ccc;
+        }
+
+		/* 強迫排行榜所有表格格子的文字一律橫排、不准縮水換行 */
+        th, td {
+            white-space: nowrap;      /*  核心：這行能強迫「玩家暱稱」變回漂亮的橫排 */
+            padding: 12px 18px;       /* 增加左右內襯，給文字最舒適的延伸空間 */
+            text-align: center;
+        }
+
+        /*  前三名華麗稱號特效 */
+        tr.rank-1 td { color: var(--gold); font-weight: bold; }
+        tr.rank-2 td { color: var(--silver); font-weight: bold; }
+        tr.rank-3 td { color: var(--bronze); font-weight: bold; }
+
+        .medal {
+            font-size: 18px;
+            margin-right: 5px;
+        }
+
+        /* 最新戰果提示標籤 */
+        .latest-tag {
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            font-weight: bold;
+            vertical-align: middle;
+        }
+
+        /* 底部功能按鈕群 */
+        .btn-group { display: flex; gap: 15px; justify-content: center; margin-top: 30px; }
+        
+        button {
+            border: none; padding: 12px 24px; font-size: 16px; border-radius: 8px; 
+            cursor: pointer; font-weight: bold; transition: 0.2s;
+        }
+        .btn-again { background-color: var(--capoo-blue); color: white; }
+        .btn-again:hover { background-color: #008cd4; transform: translateY(-2px); }
+        
+        .btn-clear { background-color: #3a3a40; color: #aaa; border: 1px solid #444; }
+        .btn-clear:hover { background-color: #4a4a52; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div class="leaderboard-box">
+        <div class="leaderboard-header">
+            <h2>🏆 60秒極限挑戰賽 排行榜 🏆</h2>
+            <div class="subtitle">依據「成功組數」與「剩餘時間」進行極限榮譽排行</div>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 15%;">名次</th>
+                    <th>玩家暱稱</th> <th style="width: 35%;">出賽英雄</th>
+                    <th style="width: 25%;">配對成功</th>
+                    <th style="width: 25%;">剩餘時間</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                </tbody>
+        </table>
+
+	<div class="btn-group">
+            <button class="btn-again" onclick="location.href='challenge.html'">重回挑戰賽</button>
+            <button class="btn-clear" onclick="clearLeaderboard()">重置排行榜</button>
+            <button onclick="location.href='index.html'" style="background-color: #3a3a40; color: #e1e1e6; border: 1px solid #555; width: 140px; padding: 12px 24px; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 8px;">回首頁</button>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            renderLeaderboard();
+        };
+
+        function renderLeaderboard() {
+            let $tbody = $('#leaderboard-body').empty();
+            
+            //統一使用 'challengeLeaderboard' 作為緩存金鑰
+            let records = JSON.parse(localStorage.getItem('challengeLeaderboard')) || [];
+            let latestHero = localStorage.getItem('playerCharName') || '貓貓蟲卡波';
+            
+            let urlParams = new URLSearchParams(window.location.search);
+            let latestNickname = localStorage.getItem('playerNickname') || urlParams.get('user') || '挑戰玩家';
+
+            let latestScore = parseInt(localStorage.getItem('challengeScore'));
+            let latestTimeLeft = parseInt(localStorage.getItem('challengeTimeLeft'));
+
+            if (!isNaN(latestScore) && !isNaN(latestTimeLeft)) {
+                let isScoreProcessed = localStorage.getItem('challengeScoreProcessed') === 'true';
+                
+                if (!isScoreProcessed) {
+                    records.forEach(r => r.isLatest = false);
+                    
+                    // 將網址撈到的正確暱稱當成獨立屬性存進排行資料庫
+                    records.push({
+                        hero: latestHero,
+                        nickname: latestNickname,
+                        score: latestScore,
+                        timeLeft: latestTimeLeft,
+                        isLatest: true
+                    });
+                    
+                    localStorage.setItem('challengeScoreProcessed', 'true');
+                    localStorage.removeItem('challengeScore');
+                    localStorage.removeItem('challengeTimeLeft');
+                    localStorage.setItem('challengeLeaderboard', JSON.stringify(records));
+                }
+            }
+
+            // 組數越高越前、時間剩越多越前
+            records.sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                return b.timeLeft - a.timeLeft;
+            });
+
+            if (records.length === 0) {
+                // 如果排行榜被清空了，貼心顯示無資料提示
+                $tbody.append(`<tr><td colspan="5" style="color:#666; padding:30px;">暫無排行資料，快去挑戰吧！</td></tr>`);
+                return;
+            }
+
+            records.forEach((rec, index) => {
+                let rankDisplay = (index === 0) ? '🥇 1' : (index === 1) ? '🥈 2' : (index === 2) ? '🥉 3' : (index + 1);
+                let rankClass = (index === 0) ? 'rank-1' : (index === 1) ? 'rank-2' : (index === 2) ? 'rank-3' : '';
+                
+                let latestBadge = rec.isLatest ? ' <span class="badge-new" style="background:#ff3b30; color:white; font-size:11px; padding:2px 6px; border-radius:4px; margin-left:5px; font-weight:bold;">NEW</span>' : '';
+
+                let rowHtml = `
+                    <tr class="${rankClass}">
+                        <td>${rankDisplay}</td>
+                        <td style="color: #ffffff; font-weight: bold;">${rec.nickname || '挑戰玩家'}</td> 
+                        <td style="color: #00A2E8; font-weight: bold;">${rec.hero}${latestBadge}</td>    
+                        <td><span style="font-weight:bold; color:#fbbf24;">${rec.score}</span> / 8 組</td>
+                        <td>${rec.score === 8 ? rec.timeLeft + ' 秒' : '--'}</td>
+                    </tr>
+                `;
+                $tbody.append(rowHtml);
+            });
+        }
+
+        // 🗑️ 清除/重置排行榜功能（徹底歸零版）
+        function clearLeaderboard() {
+            if (confirm("確定要重設排行榜，將所有數據徹底歸零嗎？")) {
+                localStorage.setItem('challengeLeaderboard', JSON.stringify([]));
+                
+                localStorage.removeItem('challengeScore');
+                localStorage.removeItem('challengeTimeLeft');
+                localStorage.setItem('challengeScoreProcessed', 'false');
+                
+                renderLeaderboard();
+            }
+        }
+    </script>
+</body>
+</html>

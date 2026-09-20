@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卡波記憶翻牌大作戰</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-family:"Microsoft JhengHei",sans-serif;
+
+    background:
+    radial-gradient(circle at top,#1f3a8a,#0f172a 60%),
+    #0f172a;
+
+    overflow:hidden;
+}
+
+/* 背景光球 */
+body::before,
+body::after{
+    content:"";
+    position:absolute;
+    border-radius:50%;
+    filter:blur(80px);
+    opacity:.35;
+}
+
+body::before{
+    width:300px;
+    height:300px;
+    background:#00A2E8;
+    top:-100px;
+    left:-100px;
+}
+
+body::after{
+    width:250px;
+    height:250px;
+    background:#4fd1ff;
+    bottom:-100px;
+    right:-100px;
+}
+
+/* 主卡片 */
+.login-box{
+
+    width:650px;
+    max-width:95%;
+
+    padding:40px;
+
+    border-radius:24px;
+
+    background:rgba(255,255,255,.08);
+
+    backdrop-filter:blur(20px);
+
+    border:1px solid rgba(255,255,255,.15);
+
+    box-shadow:
+    0 10px 30px rgba(0,0,0,.5),
+    0 0 30px rgba(0,162,232,.2);
+
+    position:relative;
+    z-index:10;
+}
+
+.logo{
+    font-size:72px;
+    margin-bottom:10px;
+    text-align:center;
+}
+
+h1{
+    color:white;
+    font-size:32px;
+    margin-bottom:8px;
+    text-align:center;
+}
+
+.subtitle{
+    color:#cbd5e1;
+    margin-bottom:30px;
+    text-align:center;
+}
+
+input[type=text]{
+
+    width:100%;
+    padding:14px;
+
+    border:none;
+    border-radius:12px;
+
+    background:rgba(255,255,255,.1);
+
+    color:white;
+    font-size:16px;
+
+    outline:none;
+
+    margin-bottom:25px;
+}
+
+input[type=text]:focus{
+    box-shadow:0 0 15px rgba(0,162,232,.5);
+}
+
+.section-title{
+    color:#fff;
+    margin-bottom:15px;
+    font-size:18px;
+}
+
+/* 模式卡片 */
+.difficulty{
+    display:flex;
+    gap:12px;
+    margin-bottom:30px;
+}
+
+.diff-card{
+    flex:1;
+    padding:15px;
+
+    border-radius:12px;
+
+    background:rgba(255,255,255,.08);
+
+    border:2px solid transparent;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+    text-align:center;
+}
+
+.diff-card:hover{
+    transform:translateY(-3px);
+}
+
+.diff-card input{
+    display:none;
+}
+
+.diff-card:has(input:checked){
+    border-color:#00A2E8;
+    box-shadow:0 0 15px rgba(0,162,232,.4);
+}
+
+.diff-title{
+    color:white;
+    font-weight:bold;
+    font-size:16px;
+}
+
+.diff-desc{
+    color:#cbd5e1;
+    font-size:13px;
+    margin-top:5px;
+}
+
+/* 按鈕 */
+.start-btn{
+
+    width:100%;
+
+    padding:15px;
+
+    border:none;
+    border-radius:14px;
+
+    background:linear-gradient(135deg,#00A2E8,#4fd1ff);
+
+    color:white;
+
+    font-size:18px;
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.3s;
+}
+
+.start-btn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:
+    0 0 20px rgba(0,162,232,.5);
+}
+
+.footer{
+    margin-top:20px;
+    color:#94a3b8;
+    font-size:13px;
+    text-align:center;
+}
+
+/* 手機版 */
+@media(max-width:700px){
+
+    .difficulty{
+        flex-direction:column;
+    }
+
+    .login-box{
+        width:95%;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="login-box">
+
+    <div class="logo">🐱</div>
+
+    <h1>卡波記憶翻牌大作戰</h1>
+
+    <div class="subtitle">
+        AI 記憶對戰版
+    </div>
+
+    <form onsubmit="startGame(event)">
+
+        <input
+            type="text"
+            id="username"
+            placeholder="請輸入你的暱稱"
+            required
+        >
+
+        <div class="section-title">
+            選擇遊戲模式
+        </div>
+
+        <div class="difficulty">
+
+            <label class="diff-card">
+
+                <input
+                    type="radio"
+                    name="difficulty"
+                    value="easy"
+                    checked
+                >
+
+                <div class="diff-title">
+                    🟢 簡單
+                </div>
+
+                <div class="diff-desc">
+                    三張牌記憶
+                </div>
+
+            </label>
+
+            <label class="diff-card">
+
+                <input
+                    type="radio"
+                    name="difficulty"
+                    value="hard"
+                >
+
+                <div class="diff-title">
+                    🔴 困難
+                </div>
+
+                <div class="diff-desc">
+                    五張牌記憶
+                </div>
+
+            </label>
+
+            <label class="diff-card">
+
+                <input
+                    type="radio"
+                    name="difficulty"
+                    value="challenge"
+                >
+
+                <div class="diff-title">
+                    ⏱️60秒極限挑戰賽⏱️
+                </div>
+
+                <div class="diff-desc">
+                    60 秒內翻出最多配對
+                </div>
+
+            </label>
+
+        </div>
+        <div style="
+        display:flex;
+        gap:12px;
+        margin-bottom:20px;
+        ">
+
+            <button
+                type="button"
+                onclick="window.location.href='story.html'"
+                style="
+                flex:1;
+                padding:12px;
+                border:none;
+                border-radius:12px;
+                cursor:pointer;
+                font-size:16px;
+                font-weight:bold;
+                background:linear-gradient(135deg,#f59e0b,#fbbf24);
+                color:white;
+                ">
+                📖 咖波群星大圖鑑
+            </button>
+
+            <button
+                type="button"
+                onclick="window.location.href='leaderboard.html'"
+                style="
+                flex:1;
+                padding:12px;
+                border:none;
+                border-radius:12px;
+                cursor:pointer;
+                font-size:16px;
+                font-weight:bold;
+                background:linear-gradient(135deg,#8b5cf6,#a78bfa);
+                color:white;
+                ">
+                🏆 60秒極限挑戰賽排行榜
+            </button>
+
+        </div>
+        <button class="start-btn">
+            🎮 開始遊戲
+        </button>
+
+    </form>
+
+    <div class="footer">
+        Capoo Memory Battle
+    </div>
+
+</div>
+
+<script>
+
+function startGame(e){
+
+    e.preventDefault();
+
+    const username =
+        document.getElementById("username").value;
+
+    const difficulty =
+        document.querySelector(
+            "input[name='difficulty']:checked"
+        ).value;
+
+    let url;
+
+    if(difficulty === "challenge"){
+
+        url =
+        `challenge.html?user=${encodeURIComponent(username)}`;
+
+    }else{
+
+        url =
+        `game.html?user=${encodeURIComponent(username)}&difficulty=${difficulty}`;
+
+    }
+
+    window.location.href = url;
+}
+
+</script>
+
+</body>
+</html>
